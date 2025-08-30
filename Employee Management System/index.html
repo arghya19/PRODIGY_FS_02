@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background: #ffffff;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef, #ffffff);
+            z-index: -2;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 25% 75%, rgba(0, 255, 117, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 75% 25%, rgba(55, 0, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(0, 255, 117, 0.03) 0%, transparent 70%);
+            animation: gradientShift 15s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .logo {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            font-weight: bold;
+            background: linear-gradient(135deg, #00ff75, #3700ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            text-shadow: 0 0 20px rgba(0, 255, 117, 0.3);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: clamp(15px, 4vw, 30px);
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #555555;
+            font-weight: 500;
+            font-size: clamp(0.85rem, 2vw, 1rem);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #00ff75, #3700ff);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #00b359;
+        }
+
+        .admin-login-btn {
+            background: linear-gradient(135deg, #00ff75, #3700ff);
+            color: white !important;
+            padding: clamp(8px, 2vw, 10px) clamp(15px, 4vw, 20px);
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 255, 117, 0.3);
+            white-space: nowrap;
+        }
+
+        .admin-login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 117, 0.4);
+        }
+
+        .admin-login-btn::after {
+            display: none;
+        }
+
+        /* Mobile menu toggle */
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #555555;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Mobile Navigation */
+        .nav-links.mobile-open {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            flex-direction: column;
+            padding: 20px;
+            gap: 20px;
+            transform: translateY(0);
+            opacity: 1;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Main content */
+        .main-content {
+            margin-top: 70px;
+            background: transparent;
+            min-height: calc(100vh - 70px);
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: url(./images/emp.webp);
+            color: #f8f9fa;
+            padding: 100px 20px;
+            text-align: center;
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 8vw, 3.5rem);
+            margin-bottom: 20px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00ff75, #3700ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 255, 117, 0.3);
+            filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.1));
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            margin-bottom: 30px;
+            font-weight: 500;
+            color: #ffffff;
+            filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.1));
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #00ff75, #3700ff);
+            color: white;
+            padding: clamp(12px, 3vw, 15px) clamp(25px, 6vw, 30px);
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bolder;
+            font-size: clamp(1rem, 3vw, 1.1rem);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 255, 117, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 255, 117, 0.5);
+        }
+
+        /* Features Section */
+        .features {
+            padding: clamp(60px, 10vw, 80px) 20px;
+            background: rgba(248, 249, 250, 0.7);
+            backdrop-filter: blur(10px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: clamp(2rem, 6vw, 2.5rem);
+            background: linear-gradient(135deg, #00ff75, #3700ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 50px;
+            font-weight: bold;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 50px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 255, 117, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 255, 117, 0.15);
+            border-color: rgba(0, 255, 117, 0.4);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #00ff75, #3700ff);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 255, 117, 0.3);
+        }
+
+        .feature-card h3 {
+            font-size: clamp(1.1rem, 3vw, 1.3rem);
+            margin-bottom: 15px;
+            color: #00b359;
+            font-weight: bold;
+        }
+
+        .feature-card p {
+            color: #666666;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            line-height: 1.6;
+        }
+
+        /* About Page */
+        .about-hero {
+            background: rgba(248, 249, 250, 0.7);
+            backdrop-filter: blur(10px);
+            padding: clamp(80px, 12vw, 100px) 20px clamp(60px, 8vw, 80px);
+            text-align: center;
+        }
+
+        .about-hero h1 {
+            font-size: clamp(2.5rem, 8vw, 3rem);
+            background: linear-gradient(135deg, #00ff75, #3700ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .about-hero p {
+            font-size: clamp(1.1rem, 3vw, 1.2rem);
+            color: #666666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .about-content {
+            padding: clamp(60px, 10vw, 80px) 20px;
+            background: rgba(248, 249, 250, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .about-section {
+            max-width: 800px;
+            margin: 0 auto 50px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            padding: clamp(25px, 5vw, 40px);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 117, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .about-section h2 {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            background: linear-gradient(135deg, #00ff75, #3700ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .about-section p {
+            color: #666666;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            color: #666666;
+            text-align: center;
+            padding: clamp(30px, 6vw, 40px) 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Responsive breakpoints */
+        @media (max-width: 768px) {
+            .mobile-toggle {
+                display: block;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                padding: 20px;
+                gap: 20px;
+                transform: translateY(-100%);
+                opacity: 0;
+                transition: all 0.3s ease;
+                pointer-events: none;
+                height: calc(100vh - 70px);
+                overflow-y: auto;
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            }
+
+            .nav-links.mobile-open {
+                transform: translateY(0);
+                opacity: 1;
+                pointer-events: all;
+            }
+
+            .nav-links li {
+                width: 100%;
+                text-align: center;
+                padding: 15px 0;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            }
+
+            .navbar {
+                padding: 0 15px;
+            }
+
+            .nav-container {
+                padding: 0 15px;
+            }
+
+            .hero {
+                padding: 80px 15px;
+                min-height: 70vh;
+            }
+
+            .about-hero {
+                padding: 80px 15px 60px;
+            }
+
+            .features {
+                padding: 60px 15px;
+            }
+
+            .about-content {
+                padding: 60px 15px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            .feature-card {
+                padding: 25px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-container {
+                padding: 0 10px;
+                height: 60px;
+            }
+
+            .main-content {
+                margin-top: 60px;
+            }
+
+            .hero {
+                padding: 60px 10px;
+                min-height: 60vh;
+            }
+
+            .about-hero {
+                padding: 60px 10px 40px;
+            }
+
+            .features,
+            .about-content {
+                padding: 40px 10px;
+            }
+
+            .feature-card {
+                padding: 20px 15px;
+            }
+
+            .about-section {
+                padding: 20px 15px;
+            }
+
+            .footer {
+                padding: 30px 10px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .nav-container {
+                height: 55px;
+                padding: 0 8px;
+            }
+
+            .main-content {
+                margin-top: 55px;
+            }
+
+            .hero {
+                padding: 50px 8px;
+            }
+
+            .features,
+            .about-content {
+                padding: 35px 8px;
+            }
+
+            .feature-card {
+                padding: 18px 12px;
+            }
+
+            .about-section {
+                padding: 18px 12px;
+            }
+        }
+
+        /* Landscape mobile adjustments */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .hero {
+                min-height: 100vh;
+                padding: 30px 20px;
+            }
+
+            .nav-container {
+                height: 55px;
+            }
+
+            .main-content {
+                margin-top: 55px;
+            }
+        }
+
+        /* Touch devices */
+        @media (hover: none) and (pointer: coarse) {
+
+            .feature-card:hover,
+            .cta-button:hover,
+            .admin-login-btn:hover {
+                transform: none;
+            }
+
+            .nav-links a:hover {
+                color: #555555;
+            }
+
+            .nav-links a,
+            .admin-login-btn,
+            .cta-button,
+            .mobile-toggle {
+                min-height: 48px;
+                min-width: 48px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        /* Safe area for devices with notches */
+        @supports (padding-top: env(safe-area-inset-top)) {
+            .navbar {
+                padding-top: env(safe-area-inset-top);
+            }
+
+            .nav-container {
+                height: calc(70px + env(safe-area-inset-top));
+            }
+
+            .main-content {
+                margin-top: calc(70px + env(safe-area-inset-top));
+            }
+        }
+
+        /* Hide Scrollbar */
+        /* For Webkit browsers (Chrome, Safari, Edge) */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+
+        /* For Firefox */
+        * {
+            scrollbar-width: none;
+        }
+
+        /* For Internet Explorer and Edge */
+        body {
+            -ms-overflow-style: none;
+        }
+
+        /* Additional fallback for older browsers */
+        html {
+            overflow: -moz-scrollbars-none;
+        }
+
+        /* Print styles */
+        @media print {
+            .navbar {
+                display: none;
+            }
+
+            body {
+                background: white;
+                color: black;
+            }
+
+            body::before,
+            body::after {
+                display: none;
+            }
+
+            .main-content {
+                margin-top: 0;
+            }
+
+            .hero,
+            .features,
+            .about-hero,
+            .about-content {
+                background: white !important;
+                color: black !important;
+            }
+
+            .hero h1,
+            .section-title,
+            .about-hero h1,
+            .about-section h2 {
+                color: black !important;
+                -webkit-text-fill-color: black !important;
+            }
+
+            .feature-card h3 {
+                color: black !important;
+            }
+
+            .hero p,
+            .feature-card p,
+            .about-hero p,
+            .about-section p {
+                color: black !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="./backend/admin-register.php" class="logo">EMS Pro</a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#" class="nav-link active" onclick="showPage('home')"><b>Home</b></a></li>
+                <li><a href="#" class="nav-link" onclick="showPage('about')"><b>About Us</b></a></li>
+                <li><a href="login.html" class="admin-login-btn">Admin Login</a></li>
+            </ul>
+            <button class="mobile-toggle" onclick="toggleMobileMenu()">☰</button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- Home Page -->
+        <div id="homePage" class="page active">
+            <!-- Hero Section -->
+            <section class="hero">
+                <div class="hero-content">
+                    <h1>Employee Management System</h1>
+                    <p>Streamline your workforce management with our comprehensive, user-friendly platform designed for
+                        modern businesses.</p>
+                    <a href="login.html" class="cta-button">Get Started</a>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section class="features">
+                <div class="container">
+                    <h2 class="section-title">Why Choose Our System?</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">👥</div>
+                            <h3>Employee Records</h3>
+                            <p>Maintain comprehensive employee profiles with personal information, job details, and
+                                performance metrics all in one place.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">📊</div>
+                            <h3>Advanced Analytics</h3>
+                            <p>Get insights into your workforce with detailed reports, attendance tracking, and
+                                performance analytics.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🔒</div>
+                            <h3>Secure & Reliable</h3>
+                            <p>Enterprise-grade security ensures your sensitive employee data is protected with
+                                industry-standard encryption.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">📱</div>
+                            <h3>Mobile Friendly</h3>
+                            <p>Access your employee management system from anywhere with our responsive design that
+                                works on all devices.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">⚡</div>
+                            <h3>Easy Integration</h3>
+                            <p>Seamlessly integrate with your existing payroll, HR systems, and other business tools for
+                                maximum efficiency.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">💼</div>
+                            <h3>Professional Support</h3>
+                            <p>Our dedicated support team is available to help you make the most of your employee
+                                management system.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- About Page -->
+        <div id="aboutPage" class="page">
+            <section class="about-hero">
+                <div class="container">
+                    <h1>About Us</h1>
+                    <p>Empowering businesses with innovative employee management solutions.</p>
+                </div>
+            </section>
+
+            <section class="about-content">
+                <div class="container">
+                    <div class="about-section">
+                        <h2>Our Mission</h2>
+                        <p>At EMS Pro, we believe that effective employee management is the cornerstone of any
+                            successful business. Our mission is to provide organizations of all sizes with powerful,
+                            intuitive tools that simplify HR processes, enhance productivity, and foster better
+                            workplace relationships.</p>
+                        <p>We understand that managing employees involves much more than just keeping records. It's
+                            about creating an environment where both employers and employees can thrive, communicate
+                            effectively, and work towards common goals.</p>
+                    </div>
+
+                    <div class="about-section">
+                        <h2>What We Offer</h2>
+                        <p>Our comprehensive Employee Management System is designed to handle all aspects of workforce
+                            management. From onboarding new hires to tracking performance metrics, our platform provides
+                            the tools you need to manage your team effectively.</p>
+                        <p>We focus on creating solutions that are not only powerful but also easy to use. Our intuitive
+                            interface ensures that HR professionals and managers can quickly access the information they
+                            need without extensive training or technical expertise.</p>
+                    </div>
+
+                    <div class="about-section">
+                        <h2>Our Values</h2>
+                        <p>We are committed to transparency, innovation, and customer success. Our team works tirelessly
+                            to ensure that our platform meets the evolving needs of modern businesses while maintaining
+                            the highest standards of data security and user privacy.</p>
+                        <p>We believe in building long-term partnerships with our clients, providing ongoing support and
+                            continuously improving our services based on feedback and industry best practices.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Arghya Nath. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Navigation functionality
+        function showPage(pageId) {
+            // Hide all pages
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+
+            // Show selected page
+            const targetPage = document.getElementById(pageId + 'Page');
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
+
+            // Update active nav link
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => link.classList.remove('active'));
+
+            // Find and activate the corresponding nav link
+            if (pageId === 'home') {
+                document.querySelector('.nav-link[onclick="showPage(\'home\')"]')?.classList.add('active');
+            } else if (pageId === 'about') {
+                document.querySelector('.nav-link[onclick="showPage(\'about\')"]')?.classList.add('active');
+            }
+
+            // Close mobile menu if open
+            const navLinks_menu = document.getElementById('navLinks');
+            navLinks_menu?.classList.remove('mobile-open');
+        }
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks?.classList.toggle('mobile-open');
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function (event) {
+            const navLinks = document.getElementById('navLinks');
+            const mobileToggle = document.querySelector('.mobile-toggle');
+
+            if (navLinks && mobileToggle &&
+                !navLinks.contains(event.target) &&
+                !mobileToggle.contains(event.target)) {
+                navLinks.classList.remove('mobile-open');
+            }
+        });
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', function () {
+            showPage('home');
+        });
+    </script>
+</body>
+
+</html>
